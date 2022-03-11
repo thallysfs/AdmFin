@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Image, Keyboard, KeyboardAvoidingView, Text, TouchableWithoutFeedback } from 'react-native'
+import { Image, Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback } from 'react-native'
 import { 
     Container,
     Header,
@@ -10,9 +10,9 @@ import {
 
  import { useTheme } from 'styled-components'
 import Logo from '../../../assets/logo.png'
-import { Input } from '../../components/Input'
-import { PasswordInput } from '../../components/PasswordInput'
-import { Button } from '../../components/Button'
+import { Input } from '../../components/Form/Input'
+import { PasswordInput } from '../../components/Form/PasswordInput'
+import { Button } from '../../components/Form/Button'
 import { ButtonText } from '../../components/ButtonText'
 
 export function Login(){

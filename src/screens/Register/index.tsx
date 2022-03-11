@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { Alert, Keyboard, KeyboardAvoidingView, Text, TouchableWithoutFeedback } from 'react-native';
-import { Button } from '../../components/Button';
+import { Keyboard, KeyboardAvoidingView, Text, TouchableWithoutFeedback } from 'react-native';
+import { Button } from '../../components/Form/Button';
 import { CircularIcon } from '../../components/CircularIcon'
 import { HeaderBar } from '../../components/HeaderBar'
-import { Input } from '../../components/Input';
+import { Input } from '../../components/Form/Input';
 import { 
   Container,
   Content,
@@ -27,6 +27,8 @@ export function Register(){
   const [nameCard, setNameCard] = useState('')
   const [closingDay, setClosingDay] = useState('')
   const [color, setColor] = useState('')
+
+  const [category, setCategory] = useState('')
 
   function handlePage(page: string){
     if(page == 'user'){
@@ -164,7 +166,26 @@ export function Register(){
 
           {/* Tela cadastro de categoria */}
           {
+            page == 'category' &&
+            <Form>
+              <Fields>
+                <Input 
+                  iconName='align-left'
+                  placeholder='Categoria'
+                  keyboardType='default'
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  onChangeText={setCategory}
+                  value={category}
+                />
+              </Fields>
 
+              <Button
+                title='Salvar'
+                enabled={true}
+                loading={false}
+              />
+            </Form> 
           }
 
           </Content>
