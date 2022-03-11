@@ -4,6 +4,7 @@ import { Button } from '../../components/Form/Button';
 import { CircularIcon } from '../../components/CircularIcon'
 import { HeaderBar } from '../../components/HeaderBar'
 import { Input } from '../../components/Form/Input';
+
 import { 
   Container,
   Content,
@@ -13,6 +14,10 @@ import {
   Form,
   Fields 
 } from './styles'
+
+interface FormData {
+  name: string;
+}
 
 export function Register(){
   const [page, setPage] = useState('user')
@@ -48,6 +53,11 @@ export function Register(){
     }
 
     setPage(page);
+  }
+
+  function handleRegisterCategory(form: FormData){
+    const data = form.name;
+    console.log(data)
   }
 
   return(
@@ -169,7 +179,7 @@ export function Register(){
             page == 'category' &&
             <Form>
               <Fields>
-                <Input 
+                <Input
                   iconName='align-left'
                   placeholder='Categoria'
                   keyboardType='default'
@@ -184,6 +194,7 @@ export function Register(){
                 title='Salvar'
                 enabled={true}
                 loading={false}
+                onPress={handleRegisterCategory}
               />
             </Form> 
           }
