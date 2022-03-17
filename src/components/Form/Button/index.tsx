@@ -31,7 +31,7 @@ export function Button({
     >
       { /* Se o loadin estiver ativo o Active indicator será exibido ao invés do nome */
         loading 
-          ? <ActivityIndicator color={theme.colors.main} />
+          ? <ActivityIndicator color={theme.colors.main_light} />
           : <Title light={light}>{title}</Title>
       }
     </Container>

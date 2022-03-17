@@ -37,9 +37,8 @@ export function InputForm({
                 {...rest}
             />
             )}
-            name={name}
-        >
-        </Controller>
+            name={name}   
+        />
     </Container>
   )
 }

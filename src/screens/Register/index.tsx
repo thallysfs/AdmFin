@@ -1,23 +1,27 @@
 import React, { useState } from 'react'
-import { Keyboard, KeyboardAvoidingView, Text, TouchableWithoutFeedback } from 'react-native';
-import { Button } from '../../components/Form/Button';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback } from 'react-native';
 import { CircularIcon } from '../../components/CircularIcon'
 import { HeaderBar } from '../../components/HeaderBar'
-import { Input } from '../../components/Form/Input';
+import firestore from '@react-native-firebase/firestore'
+import uuid from 'react-native-uuid'
 
 import { 
   Container,
   Content,
+  Fields,
+  Form,
   Header,
   Title,
   WrapeIcons,
-  Form,
-  Fields 
 } from './styles'
+import { Nunito_200ExtraLight } from '@expo-google-fonts/nunito';
+import { Input } from '../../components/Form/Input';
+import { Button } from '../../components/Form/Button';
 
 interface FormData {
-  name: string;
+  category: string;
 }
+
 
 export function Register(){
   const [page, setPage] = useState('user')
@@ -30,10 +34,15 @@ export function Register(){
   const [gender, setGender] = useState('')
 
   const [nameCard, setNameCard] = useState('')
-  const [closingDay, setClosingDay] = useState('')
+  const [closingDay, setClosingDay] = useState(0)
   const [color, setColor] = useState('')
 
   const [category, setCategory] = useState('')
+
+  //estados para o botão
+  const [enabled, setEnabled] = useState(true)
+  const [loading, setLoading] = useState(false)
+
 
   function handlePage(page: string){
     if(page == 'user'){
@@ -55,13 +64,104 @@ export function Register(){
     setPage(page);
   }
 
-  function handleRegisterCategory(form: FormData){
-    const data = form.name;
-    console.log(data)
+  //cadastro de categoria
+  async function handleAddCategory(){
+    if(category === ''){
+      setEnabled(false);
+      setLoading(true);
+
+      Alert.alert('Erro', 'Favor inserir uma categoria')
+    }
+    else {
+        firestore()
+       .collection('category')
+       .add({
+         category
+       })
+       .then(()=>{
+           Alert.alert('Cadastrado', `*${category}* cadastrado(a) com sucesso!`)
+       })
+       .catch((error)=> console.log(error))
+
+      setCategory('')
+      handlePage('')
+    }
+
+
+    setEnabled(true);
+    setLoading(false);
+    
   }
 
+  //cadastro de usuário
+  async function handleAddUser(){
+    if(name === '' || age === '' || gender ===''){
+      setEnabled(false);
+      setLoading(true);
+
+      Alert.alert('Erro', 'Favor inserir todos os dados')
+    }
+    else {
+      let id = String(uuid.v4());
+
+        firestore()
+        .collection('User')
+        .add({
+          age,
+          gender,
+          id,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+          name
+        })
+        .then(()=>{
+            Alert.alert('Cadastrado', `Usuário *${name}* cadastrado(a) com sucesso!`)
+        })
+        .catch((error)=> console.log(error))
+
+      setName('');
+      setAge('');
+      setGender('');
+      handlePage('')
+    }
+  
+  
+      setEnabled(true);
+      setLoading(false);
+      
+    }
+
+  //cadastro de cartão
+  async function handleAddCard(){
+    if(nameCard === '' || closingDay === 0 || color ===''){
+        setEnabled(false);
+        setLoading(true);
+
+        Alert.alert('Erro', 'Favor inserir todos os dados')
+      }
+      else {
+        let colorHash = `#${color}`;
+        let id = String(uuid.v4());
+
+          firestore()
+          .collection('card')
+          .add({
+            closingDay,
+            colorHash,
+            id,
+            nameCard
+          })
+          .then(()=>{
+              Alert.alert('Cadastrado', `Cartão *${nameCard}* cadastrado com sucesso!`)
+              setNameCard('')
+              setClosingDay(0)
+              setColor('')
+              handlePage('')
+          })
+          .catch((error)=> console.log(error))
+    }
+  }
   return(
-    <KeyboardAvoidingView behavior='position' enabled>
+    <KeyboardAvoidingView enabled behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <Container>
           <HeaderBar />
@@ -92,7 +192,7 @@ export function Register(){
             </WrapeIcons>
           </Header>
           <Content>
-          {/* Tela cadastro de usuário */}
+            {/* Tela cadastro de usuário */}
           { page === 'user' &&
             <Form>
               <Fields>
@@ -127,8 +227,9 @@ export function Register(){
 
               <Button
                 title='Salvar'
-                enabled={true}
-                loading={false}
+                enabled={enabled}
+                loading={loading}
+                onPress={handleAddUser}
               />
             </Form> 
           }
@@ -153,7 +254,7 @@ export function Register(){
                   keyboardType='number-pad'
                   autoCorrect={false}
                   autoCapitalize="none"
-                  onChangeText={setClosingDay}
+                  onChangeText={value => setClosingDay(Number(value))}
                   value={closingDay}
                 />
                 <Input 
@@ -170,6 +271,7 @@ export function Register(){
                 title='Salvar'
                 enabled={true}
                 loading={false}
+                onPress={handleAddCard}
               />
             </Form> 
           }
@@ -178,7 +280,7 @@ export function Register(){
           {
             page == 'category' &&
             <Form>
-              <Fields>
+              <Fields style={{paddingBottom: 128}}>
                 <Input
                   iconName='align-left'
                   placeholder='Categoria'
@@ -192,16 +294,17 @@ export function Register(){
 
               <Button
                 title='Salvar'
-                enabled={true}
-                loading={false}
-                onPress={handleRegisterCategory}
+                enabled={enabled}
+                loading={loading}
+                onPress={handleAddCategory}
               />
             </Form> 
           }
-
           </Content>
         </Container>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   )
 }
+
+
