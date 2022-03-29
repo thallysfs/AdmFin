@@ -37,15 +37,25 @@ interface PropsCategory {
   category: string;
 }
 
+interface PropsUser {
+  id: string;
+  name: string;
+}
+
+interface PropsCard {
+  id: string;
+  nameCard: string;
+}
+
+
+
 export function Expense(){
   const[category, setCategory] = useState();
   const[card, setCard] = useState();
   const[user, setUser] = useState();
-  const[userList, setUserList] = useState<[]>([]);
-  const[cardList, setCardList] = useState<[]>([]);
+  const[userList, setUserList] = useState<PropsUser[]>([]);
+  const[cardList, setCardList] = useState<PropsCard[]>([]);
   const[categoryList, setCategoryList] = useState<PropsCategory[]>([]);
-
-  const[language, setLanguage] = useState('');
 
   //listar categorias
   function onCategoryList(){
@@ -75,7 +85,7 @@ export function Expense(){
           id: doc.id,
           ...doc.data()
         }
-      })
+      }) as PropsUser[]
       setUserList(dataUser);
     })
     .catch(error => console.error(error))
@@ -92,7 +102,7 @@ export function Expense(){
           id: doc.id,
           ...doc.data()
         }
-      })
+      }) as PropsCard[]
       setCardList(dataCard);
     })
     .catch(error => console.error(error))
@@ -170,6 +180,36 @@ export function Expense(){
                       categoryList.map( cat =>{
                         return {
                           key: cat.id, label: cat.category, value: cat.category
+                        }
+                      }
+                      )
+                    }
+                  /> 
+                </SelectItem>
+                <SelectItem>
+                  <RNPickerSelect
+                    placeholder={{ label: "Selecione um responsável", value: null }}
+                    onValueChange={(value) => setUser(value)}
+                    style={pickerSelectStyles}
+                    items={
+                      userList.map( user =>{
+                        return {
+                          key: user.id, label: user.name, value: user.name
+                        }
+                      }
+                      )
+                    }
+                  /> 
+                </SelectItem>
+                <SelectItem>
+                  <RNPickerSelect
+                    placeholder={{ label: "Selecione um cartão", value: null }}
+                    onValueChange={(value) => setCard(value)}
+                    style={pickerSelectStyles}
+                    items={
+                      cardList.map( card =>{
+                        return {
+                          key: card.id, label: card.nameCard, value: card.nameCard
                         }
                       }
                       )
