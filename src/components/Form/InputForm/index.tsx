@@ -6,12 +6,14 @@ import { Feather } from '@expo/vector-icons'
 
 import { 
     Container,
+    Error
 } from './styles'
 
 interface Props extends TextInputProps {
     control: Control
     name: string;
     iconName: React.ComponentProps<typeof Feather>['name']
+    error?: string;
 }
 
 
@@ -19,6 +21,7 @@ export function InputForm({
     control,
     name,
     iconName,
+    error,
     ...rest
 }: Props){
 
@@ -39,6 +42,7 @@ export function InputForm({
             )}
             name={name}   
         />
+        { error && <Error>{ error }</Error>}
     </Container>
   )
 }

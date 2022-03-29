@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
-import { Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Text, StyleSheet, Alert } from 'react-native'
+import { Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, StyleSheet, Alert } from 'react-native'
 import { HeaderBar } from '../../components/HeaderBar'
 import firestore from '@react-native-firebase/firestore'
-import uuid from 'react-native-uuid'
 import RNPickerSelect from "react-native-picker-select";
+import { InputForm } from '../../components/Form/InputForm'
+import * as Yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup' 
+import SendMoneySvg from '../../assets/sendMoney.svg'
+import { useForm } from 'react-hook-form'
+import { Button } from '../../components/Form/Button'
+import { ScrollView } from 'react-native-gesture-handler'
 
 import { 
   Container, 
@@ -12,23 +18,13 @@ import {
   Form, 
   Header,
   Title,
-  SelectItem, 
-  ModalStyle
+  SelectItem,
 } from './styles'
-import SendMoneySvg from '../../assets/sendMoney.svg'
-import { InputForm } from '../../components/Form/InputForm'
-import { useForm } from 'react-hook-form'
-import { Button } from '../../components/Form/Button'
-import { ScrollView } from 'react-native-gesture-handler'
-import { Picker } from '@react-native-picker/picker'
 
 
 interface FormData {
   description: string;
   value: number;
-  category: string;
-  card?: string;
-  user: string;
   obs: string;
 }
 
@@ -47,15 +43,36 @@ interface PropsCard {
   nameCard: string;
 }
 
+const schema = Yup.object().shape({
+  description: Yup
+    .string()
+    .required('Informa uma descrição'),
+  value: Yup
+    .number()
+    .required('Informe o valor da despesa')
+    .typeError('O valor deve ser numério')
+    .positive('O Valor não pode ser negativo'),
+  obs: Yup.string()
+})
+
 
 
 export function Expense(){
-  const[category, setCategory] = useState();
-  const[card, setCard] = useState();
-  const[user, setUser] = useState();
+  const[category, setCategory] = useState('');
+  const[card, setCard] = useState('');
+  const[user, setUser] = useState('');
   const[userList, setUserList] = useState<PropsUser[]>([]);
   const[cardList, setCardList] = useState<PropsCard[]>([]);
   const[categoryList, setCategoryList] = useState<PropsCategory[]>([]);
+
+  //associação do resolverdor com as regras do Yup
+  const {
+    control,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
+    resolver: yupResolver(schema)
+  });
 
   //listar categorias
   function onCategoryList(){
@@ -108,7 +125,7 @@ export function Expense(){
     .catch(error => console.error(error))
   }
 
-
+  //useFocus ao invés do useEffect pq navigationTabs não atualiza página
   useFocusEffect(useCallback(()=>{
     onCategoryList();
     onUserList();
@@ -119,26 +136,48 @@ export function Expense(){
     console.log(cardList)
   }, []));
 
-  function showCat(){
-    Alert.alert('Categoria', category)
-  }
 
-  const {
-    control,
-    handleSubmit
-  } = useForm();
+  async function handleRegister(form: FormData){
+    //validando o que não foi possível no Yup
+    if(!category)
+      return Alert.alert('Categoria','Selecione uma categoria');    
+      
+    if(!user)
+      return Alert.alert('Responsável','Selecione um responsável');    
 
-  function handleRegister(form: FormData){
+    //setando alguma coisa no obs
+    form.obs = form.obs === '' ? '' : form.obs
+      
+    // criando objetos de dados a serem enviados
     const data = {
-      card: form.card,
+      card: card,
       category: category,
       date: firestore.FieldValue.serverTimestamp(),
       description: form.description,
-      id: String(uuid.v4()),
       obs: form.obs,
-      user: form.user
+      user: user
     }
-    console.log(form)
+    console.log(data)
+
+    //salvar dados no firestore
+    firestore()
+          .collection('expense')
+          .add({
+            card: card,
+            category: category,
+            creatAt: firestore.FieldValue.serverTimestamp(),
+            description: form.description,
+            obs: form.obs,
+            user: user,
+            value: form.value
+          })
+          .then(()=>{
+            setCard('')
+            setCategory('')
+            setUser('')
+            //Alert.alert('Cadastrado', `Cartão *${nameCard}* cadastrado com sucesso!`)
+          })
+          .catch((error)=> console.log(error))
   }
 
   return(
@@ -154,22 +193,26 @@ export function Expense(){
             <Form>
               <Fields>
                 <InputForm
-                  name="descrition" 
+                  name="description" 
                   control={control}
                   placeholder="Descrição"
                   iconName='align-left'
+                  error={errors.description && errors.description.message}
                 />
                 <InputForm
                   name="value" 
                   control={control}
                   placeholder="Valor"
                   iconName='dollar-sign'
+                  keyboardType='numeric'
+                  error={errors.value && errors.value.message}
                 />
                 <InputForm
                   name="obs" 
                   control={control}
                   placeholder="Observação"
                   iconName='align-left'
+                  error={errors.obs && errors.obs.message}
                 />
                 <SelectItem>
                   <RNPickerSelect
@@ -236,6 +279,7 @@ export function Expense(){
   )
 }
 
+// Estilização do picker
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
       fontSize: 16,
