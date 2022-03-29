@@ -36,9 +36,8 @@ export const Fields = styled.View`
 
 export const SelectItem = styled.View`
     flex: 1;
-    backgroundColor: ${({ theme }) => theme.colors.background_secondary};
+    background-color: ${({ theme }) => theme.colors.background_secondary};
     align-items: center;
     justify-content: center;
     margin-bottom: 10px;
 `;
-

@@ -3,7 +3,6 @@ import { Alert, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedba
 import { CircularIcon } from '../../components/CircularIcon'
 import { HeaderBar } from '../../components/HeaderBar'
 import firestore from '@react-native-firebase/firestore'
-import uuid from 'react-native-uuid'
 
 import { 
   Container,
@@ -14,7 +13,6 @@ import {
   Title,
   WrapeIcons,
 } from './styles'
-import { Nunito_200ExtraLight } from '@expo-google-fonts/nunito';
 import { Input } from '../../components/Form/Input';
 import { Button } from '../../components/Form/Button';
 
@@ -102,14 +100,11 @@ export function Register(){
       Alert.alert('Erro', 'Favor inserir todos os dados')
     }
     else {
-      let id = String(uuid.v4());
-
         firestore()
         .collection('User')
         .add({
           age,
           gender,
-          id,
           createdAt: firestore.FieldValue.serverTimestamp(),
           name
         })
@@ -140,14 +135,12 @@ export function Register(){
       }
       else {
         let colorHash = `#${color}`;
-        let id = String(uuid.v4());
 
           firestore()
           .collection('card')
           .add({
             closingDay,
             colorHash,
-            id,
             nameCard
           })
           .then(()=>{
@@ -255,7 +248,7 @@ export function Register(){
                   autoCorrect={false}
                   autoCapitalize="none"
                   onChangeText={value => setClosingDay(Number(value))}
-                  value={closingDay}
+                  value={String(closingDay)}
                 />
                 <Input 
                   iconName='edit-3'
